@@ -1,0 +1,42 @@
+server:
+  port: 8184
+
+customer-service:
+  customer-topic-name: customer
+
+spring:
+  jpa:
+    open-in-view: false
+    show-sql: false
+    database-platform: org.hibernate.dialect.PostgreSQL9Dialect
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL9Dialect
+  datasource:
+    url: jdbc:postgresql://192.168.0.59:54320/postgres?currentSchema=customer&binaryTransfer=true&reWriteBatchedInserts=true
+    username: user
+    password: admin
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      platform: postgres
+      mode: always
+      schema-locations: classpath:init-schema.sql
+
+kafka-config:
+  bootstrap-servers: 192.168.0.59:29094
+  schema-registry-url-key: schema.registry.url
+  schema-registry-url: http://192.168.0.59:8081
+  num-of-partitions: 1
+  replication-factor: 1
+
+kafka-producer-config:
+  key-serializer-class: org.apache.kafka.common.serialization.StringSerializer
+  value-serializer-class: io.confluent.kafka.serializers.KafkaAvroSerializer
+  compression-type: snappy
+  acks: all
+  batch-size: 16384
+  batch-size-boost-factor: 100
+  linger-ms: 5
+  request-timeout-ms: 60000
+  retry-count: 5

@@ -1,0 +1,57 @@
+# https://levelup.gitconnected.com/kafka-primer-for-docker-how-to-setup-kafka-start-messaging-and-monitor-broker-metrics-in-docker-b4e018e205d1
+version: '3.7'
+services:
+  schema-registry:
+    image: confluentinc/cp-schema-registry:${KAFKA_VERSION}
+    hostname: schema-registry
+    depends_on:
+      - kafka
+#      - kafka-broker-2
+#      - kafka-broker-3
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper:2181'
+      SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092,LISTENER_LOCAL://0.0.0.0:9092
+      SCHEMA_REGISTRY_DEBUG: 'true'
+    networks:
+      - ${GLOBAL_NETWORK:-kafka}
+  kafka:
+    image: confluentinc/cp-kafka:${KAFKA_VERSION}
+    hostname: kafka
+    ports:
+      - "29094:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://192.168.0.59:29094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1   
+    volumes:
+      - "./volumes/kafka/broker-1:/var/lib/kafka/data"
+    networks:
+      - ${GLOBAL_NETWORK:-kafka}
+#  kafka-manager:
+#    image: hlebalbau/kafka-manager:stable
+#    restart: always
+#    ports:
+#      - "9000:9000"
+#    environment:
+#      ZK_HOSTS: "zookeeper:2181"
+#    networks:
+#      - ${GLOBAL_NETWORK:-kafka}
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    networks: 
+      - ${GLOBAL_NETWORK:-kafka}
+    depends_on:
+      - kafka
+    ports:
+      - 19000:9000
+    environment:
+      KAFKA_BROKERCONNECT: "kafka:9092"
+      ZK_HOSTS: "zookeeper:2181"

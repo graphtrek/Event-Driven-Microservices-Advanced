@@ -1,0 +1,10 @@
+### Send POST request with json body
+POST http://localhost:8184/customers
+Content-Type: application/json
+
+{
+  "customerId":"d215b5f8-0249-4dc5-89a3-51fd148cfb45",
+  "username": "user_2",
+  "firstName": "Armandooooooo",
+  "lastName": "Maradonaaaaaaa"
+}

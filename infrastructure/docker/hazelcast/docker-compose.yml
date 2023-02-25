@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  zipkin:
+    container_name: zipkin
+    image: openzipkin/zipkin:latest
+    extra_hosts: ['host.docker.internal:host-gateway']
+    restart: always
+    ports:
+      - "9411:9411"
+# docker run --rm -d --name=$INSTANCE_NAME -e CLASSPATH="/opt/hazelcast/CLASSPATH_EXT" -e 
+#JAVA_OPTS="-Xms512M -Xmx1024M -Dhazelcast.config=/opt/hazelcast/config_ext/hazelcast-docker.xml -Dhazelcast.local.publicAddress=$IP:$PORT" -v $LOCAL_CONFIG_DIR:/opt/hazelcast/config_ext -v $LOCAL_CACHE_OBJECTS:/opt/hazelcast/CLASSPATH_EXT -p $PORT:5701 hazelcast/hazelcast
+  hazelcast:
+    image: hazelcast/hazelcast:latest
+    volumes:
+        - ./hazelcast/hazelcast-docker.xml:/opt/hazelcast/config/hazelcast.xml
+    environment:
+      - "JAVA_OPTS=-Dhazelcast.config=/opt/hazelcast/config/hazelcast.xml" 
+    ports:
+      - "5701:5701"
+  
+  management-center:
+    image: hazelcast/management-center:latest
+    ports:
+      - "8181:8080"
+    environment:
+      - MC_DEFAULT_CLUSTER=dev
+      - MC_DEFAULT_CLUSTER_MEMBERS=hazelcast
+
+# Zipkin: http://localhost:9411/zipkin/
+# ManCenter: http://localhost:8181
